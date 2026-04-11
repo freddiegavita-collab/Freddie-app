@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#111009">
+<title>Freddie — Daily</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#111009;--bg2:#1a1812;--bg3:#242018;--bg4:#2e2a20;
+  --gold:#c9a84c;--gold2:#a8853a;--gold3:rgba(201,168,76,0.12);
+  --text:#f2ead8;--text2:#9c9278;--text3:#5a5340;
+  --green:#4caf82;--green2:rgba(76,175,130,0.15);
+  --red:#d4624a;--red2:rgba(212,98,74,0.15);
+  --blue:#5b8dee;--blue2:rgba(91,141,238,0.12);
+  --purple:#9b7de8;--amber:#e8a93a;
+  --border:rgba(201,168,76,0.1);--border2:rgba(201,168,76,0.2);
+  --display:'Playfair Display',serif;
+  --mono:'DM Mono',monospace;
+  --body:'Outfit',sans-serif;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --r:10px;--rl:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--body);overscroll-behavior:none}
+
+/* ─── SETUP ─── */
+#setup{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:40px 24px;text-align:center;background:var(--bg)}
+.setup-mark{font-family:var(--display);font-size:52px;color:var(--gold);margin-bottom:8px;letter-spacing:-1px}
+.setup-title{font-family:var(--display);font-size:26px;font-weight:500;color:var(--text);margin-bottom:6px}
+.setup-sub{font-size:14px;color:var(--text2);margin-bottom:40px;line-height:1.6;max-width:320px}
+.setup-lbl{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:7px;text-align:left;width:100%;max-width:380px}
+.setup-inp{width:100%;max-width:380px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:13px 16px;font-size:13px;font-family:var(--mono);color:var(--text);margin-bottom:20px;outline:none;transition:border-color .2s}
+.setup-inp:focus{border-color:var(--gold)}
+.setup-btn{width:100%;max-width:380px;background:var(--gold);color:#111009;border:none;border-radius:var(--r);padding:14px;font-size:14px;font-weight:600;font-family:var(--body);cursor:pointer;letter-spacing:.03em;transition:background .2s}
+.setup-btn:active{background:var(--gold2)}
+.setup-note{font-size:11px;color:var(--text3);margin-top:18px;max-width:320px;line-height:1.6}
+
+/* ─── APP SHELL ─── */
+#app{display:none;flex-direction:column;height:100dvh;overflow:hidden}
+
+/* ─── HEADER ─── */
+.hdr{padding:calc(var(--safe-top) + 14px) 18px 12px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;position:relative}
+.hdr-left{flex:1;min-width:0}
+.hdr-date{font-family:var(--display);font-size:17px;font-weight:500;color:var(--text);letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-sub{font-size:11px;color:var(--text2);margin-top:1px}
+.hdr-clock{font-family:var(--mono);font-size:15px;color:var(--gold);flex-shrink:0}
+.hdr-btns{display:flex;gap:6px}
+.ibtn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;transition:all .15s}
+.ibtn:active{background:var(--bg3);color:var(--gold)}
+
+/* ─── PROGRESS ─── */
+.prog-wrap{padding:8px 18px 0;flex-shrink:0;background:var(--bg)}
+.prog-track{height:2px;background:var(--bg4);border-radius:1px}
+.prog-fill{height:2px;background:var(--gold);border-radius:1px;width:0;transition:width .4s}
+.prog-lbl{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:4px;padding-bottom:6px}
+
+/* ─── CONTEXT BAR ─── */
+.ctx{margin:8px 14px 0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--text2);line-height:1.65;flex-shrink:0}
+.ctx b{color:var(--text);font-weight:500}
+
+/* ─── QUICK ACTIONS ─── */
+.qa-row{display:flex;gap:6px;padding:8px 14px 0;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.qa-row::-webkit-scrollbar{display:none}
+.qa-pill{flex-shrink:0;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:6px 12px;font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;white-space:nowrap;font-family:var(--body);transition:all .15s}
+.qa-pill:active,.qa-pill:hover{background:var(--bg3);color:var(--gold);border-color:var(--gold2)}
+.qa-pill.gold{background:var(--gold3);border-color:var(--gold2);color:var(--gold)}
+
+/* ─── PLANNER SCROLL ─── */
+#planner-scroll{flex:1;overflow-y:auto;padding:10px 14px 180px;scrollbar-width:thin;scrollbar-color:var(--bg4) transparent}
+
+/* ─── SECTIONS ─── */
+.sec-wrap{margin-bottom:18px}
+.sec-hd{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);padding:5px 0 7px;border-bottom:1px solid var(--border);margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+.sec-hd-arrow{font-size:12px;color:var(--text3);transition:transform .2s}
+.sec-hd.collapsed .sec-hd-arrow{transform:rotate(-90deg)}
+
+/* ─── ITEMS ─── */
+.item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:5px;transition:opacity .2s,border-color .2s,transform .1s;position:relative}
+.item.done{opacity:.32}
+.item.active{border-color:var(--gold2)}
+.item.skipped{opacity:.28}
+.item.dragging{opacity:.5;transform:scale(.98)}
+.item.drag-over{border-color:var(--gold);border-style:dashed}
+
+.item-hd{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;cursor:pointer;user-select:none;min-height:56px}
+.drag-handle{font-size:14px;color:var(--text3);cursor:grab;padding-top:2px;flex-shrink:0;touch-action:none;user-select:none}
+.drag-handle:active{cursor:grabbing;color:var(--gold)}
+
+.cb{width:22px;height:22px;min-width:22px;border:1.5px solid var(--border2);border-radius:5px;margin-top:1px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s}
+.cb.ticked{background:var(--green);border-color:var(--green)}
+.cb.ticked::after{content:'';display:block;width:5px;height:9px;border:2.5px solid #111;border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-2px)}
+.cb.skipped-cb{background:var(--bg3);border-color:var(--text3)}
+.cb.skipped-cb::after{content:'—';font-size:10px;color:var(--text3);font-family:var(--mono)}
+
+.item-meta{flex:1;min-width:0}
+.item-time-row{display:flex;align-items:center;gap:5px;margin-bottom:2px;flex-wrap:wrap}
+.item-time{font-family:var(--mono);font-size:10px;color:var(--text3);font-weight:500}
+.item-dur{font-size:10px;color:var(--text3)}
+.badge{font-size:9px;font-weight:600;letter-spacing:.05em;padding:2px 6px;border-radius:8px;text-transform:uppercase}
+.badge-now{background:rgba(201,168,76,.15);color:var(--gold)}
+.badge-skip{background:var(--bg3);color:var(--text3)}
+.badge-type{background:var(--bg3);color:var(--text3)}
+.badge-yt{background:rgba(212,98,74,.15);color:#e87560;cursor:pointer}
+.badge-yt:hover{background:rgba(212,98,74,.25)}
+
+.item-title{font-size:13px;font-weight:500;line-height:1.3;color:var(--text)}
+.item-sub{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.5}
+.item-actions{display:flex;align-items:center;gap:4px;flex-shrink:0;margin-top:1px}
+.act-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--bg3);color:var(--text3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:all .15s}
+.act-btn:active,.act-btn:hover{color:var(--gold);border-color:var(--gold2)}
+.act-btn.danger:hover{color:var(--red);border-color:var(--red)}
+
+/* ─── ITEM BODY ─── */
+.item-body{padding:0 12px 12px 44px;border-top:1px solid var(--border);display:none}
+.t-row{display:flex;align-items:center;gap:8px;padding:10px 0 6px}
+.t-disp{font-family:var(--mono);font-size:22px;font-weight:500;min-width:58px;color:var(--text)}
+.t-disp.go{color:var(--green)}
+.t-disp.over{color:var(--red)}
+.t-disp.stopped{color:var(--text3)}
+.t-btn{padding:6px 12px;border-radius:7px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--body);transition:all .15s}
+.t-btn:active{background:var(--bg4);color:var(--text)}
+.t-btn.stop-btn{border-color:rgba(212,98,74,.3);color:var(--red)}
+.dlbl{font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:8px 0 4px}
+textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text);resize:vertical;min-height:50px;font-family:var(--body);line-height:1.5;outline:none;transition:border-color .15s}
+textarea:focus{border-color:var(--border2)}
+.pain-grid{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 3px}
+.pain-cell{display:flex;flex-direction:column;gap:3px}
+.pain-cell label{font-size:10px;color:var(--text2);font-weight:500}
+.pain-cell input[type=number]{width:50px;font-size:13px;text-align:center;padding:5px;border-radius:7px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:var(--mono);outline:none}
+.jaw-warn{font-size:11px;color:var(--amber);margin-top:5px;display:none;font-weight:500}
+.yt-link{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#e87560;margin-top:8px;text-decoration:none;background:rgba(212,98,74,.1);padding:5px 10px;border-radius:7px;border:1px solid rgba(212,98,74,.2);cursor:pointer}
+.yt-link:hover{background:rgba(212,98,74,.18)}
+
+/* ─── REST BLOCKS ─── */
+.rest-block{background:var(--bg);border:1px dashed var(--border2);border-radius:var(--rl);padding:8px 12px;margin-bottom:5px;display:flex;gap:10px;align-items:flex-start}
+.rest-dot{width:5px;height:5px;min-width:5px;border-radius:50%;background:var(--text3);margin-top:5px}
+.rest-txt{font-size:12px;color:var(--text2);line-height:1.4}
+.rest-sub{font-size:10px;color:var(--text3);margin-top:1px}
+
+/* ─── CHAT / VOICE BAR ─── */
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;padding:10px 14px calc(var(--safe-bottom) + 10px);background:linear-gradient(to top,var(--bg) 75%,transparent);z-index:60}
+.chat-shell{background:var(--bg2);border:1px solid var(--border2);border-radius:18px;overflow:hidden;transition:border-color .2s}
+.chat-shell.active{border-color:var(--gold2)}
+.msgs{max-height:200px;overflow-y:auto;padding:10px 12px 0;display:none;scrollbar-width:none}
+.msgs::-webkit-scrollbar{display:none}
+.msg{margin-bottom:9px;font-size:13px;line-height:1.55;animation:fadeup .2s ease}
+@keyframes fadeup{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.msg.user{color:var(--text2);font-style:italic}
+.msg.ai{color:var(--text)}
+.msg.thinking{color:var(--text3);font-style:italic}
+.msg.system{color:var(--green);font-size:11px;font-style:italic}
+.chat-input-row{display:flex;align-items:flex-end;gap:8px;padding:9px 10px}
+#chat-inp{flex:1;background:transparent;border:none;outline:none;font-size:14px;color:var(--text);font-family:var(--body);resize:none;max-height:80px;overflow-y:auto;scrollbar-width:none;line-height:1.4}
+#chat-inp::-webkit-scrollbar{display:none}
+#chat-inp::placeholder{color:var(--text3)}
+.send-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--gold);color:#111;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0}
+.send-btn:active{background:var(--gold2)}
+.mic-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;transition:all .2s}
+.mic-btn.listening{background:var(--red);border-color:var(--red);color:#fff;animation:pulse 1s infinite}
+.mic-btn.thinking{background:var(--purple);border-color:var(--purple);color:#fff}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+
+/* ─── NAP OVERLAY ─── */
+#nap-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:32px}
+.nap-icon{font-size:48px;margin-bottom:12px}
+.nap-title{font-family:var(--display);font-size:24px;font-weight:500;color:var(--text);margin-bottom:6px}
+.nap-countdown{font-family:var(--mono);font-size:48px;font-weight:500;color:var(--gold);margin:16px 0}
+.nap-sub{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.6}
+.nap-cancel{padding:12px 28px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--body)}
+
+/* ─── MODALS ─── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;align-items:flex-end}
+.overlay.open{display:flex}
+.sheet{background:var(--bg2);border-radius:22px 22px 0 0;width:100%;max-height:88dvh;overflow-y:auto;padding:18px 18px calc(var(--safe-bottom) + 18px);border-top:1px solid var(--border2)}
+.sheet-handle{width:32px;height:3px;background:var(--bg4);border-radius:2px;margin:0 auto 16px}
+.sheet-title{font-family:var(--display);font-size:20px;font-weight:500;margin-bottom:14px}
+.tab-bar{display:flex;gap:0;background:var(--bg3);border-radius:8px;padding:3px;margin-bottom:14px}
+.stab{flex:1;padding:7px;text-align:center;font-size:11px;font-weight:600;color:var(--text3);border-radius:6px;cursor:pointer;user-select:none;transition:all .15s}
+.stab.on{background:var(--bg2);color:var(--text)}
+.tab-pane{display:none}.tab-pane.on{display:block}
+.flbl{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.sheet textarea{min-height:110px;margin-bottom:10px;font-size:12px}
+.mnote{font-size:11px;color:var(--text3);margin-bottom:14px;line-height:1.6}
+.sheet-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.mbn{padding:11px 18px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--body);border:none}
+.mbn.cancel{background:var(--bg3);color:var(--text2)}
+.mbn.save{background:var(--gold);color:#111}
+.api-box{background:var(--bg3);border-radius:var(--r);padding:12px;margin-bottom:12px}
+.api-box label{font-size:11px;color:var(--text2);display:block;margin-bottom:5px}
+.api-box input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;font-size:12px;font-family:var(--mono);color:var(--text);outline:none}
+.api-box input:focus{border-color:var(--gold)}
+.dzone{margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
+.dbtn{width:100%;padding:11px;border-radius:var(--r);border:1px solid rgba(212,98,74,.25);background:transparent;color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--body);margin-bottom:7px}
+.sync-box{background:var(--bg3);border-radius:var(--r);padding:12px;margin-bottom:10px}
+.sync-box-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px}
+.sync-box-sub{font-size:11px;color:var(--text2);margin-bottom:8px;line-height:1.5}
+.sync-confirm{font-size:11px;color:var(--green);margin-top:5px;display:none}
+.sync-error{font-size:11px;color:var(--red);margin-top:5px;display:none}
+.gbtn{width:100%;padding:10px;border-radius:8px;border:none;background:var(--gold);color:#111;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--body)}
+
+/* ─── BREAK MODAL ─── */
+.break-card{background:var(--bg2);border-radius:20px;width:100%;max-width:320px;margin:auto;padding:22px;text-align:center;border:1px solid var(--border2)}
+.break-title{font-family:var(--display);font-size:20px;font-weight:500;margin-bottom:6px}
+.break-sub{font-size:12px;color:var(--text2);margin-bottom:18px}
+.break-pills{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:18px}
+.break-pill{padding:9px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--body);transition:all .15s}
+.break-pill.on{background:var(--gold);border-color:var(--gold);color:#111}
+.break-ok{width:100%;padding:12px;border-radius:var(--r);border:none;background:var(--gold);color:#111;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--body);margin-bottom:8px}
+.break-cancel{width:100%;padding:8px;border-radius:var(--r);border:none;background:transparent;color:var(--text3);font-size:12px;cursor:pointer;font-family:var(--body)}
+.break-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;padding:20px}
+.break-overlay.open{display:flex}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setup">
+  <div class="setup-mark">𝄞</div>
+  <div class="setup-title">Freddie Daily</div>
+  <div class="setup-sub">Your planner, practice coach, and voice assistant. All in one.</div>
+  <div class="setup-lbl">Anthropic API key</div>
+  <input type="password" class="setup-inp" id="setup-key" placeholder="sk-ant-api03-...">
+  <button class="setup-btn" onclick="startApp()">Let's go</button>
+  <div class="setup-note">Stored locally on this device only. Never sent anywhere except directly to Anthropic's API.</div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-left">
+      <div class="hdr-date" id="hdr-date"></div>
+      <div class="hdr-sub" id="hdr-sub"></div>
+    </div>
+    <div class="hdr-clock" id="hdr-clock"></div>
+    <div class="hdr-btns">
+      <div class="ibtn" onclick="openBreak()" title="Break">☕</div>
+      <div class="ibtn" onclick="openSettings()" title="Settings">⚙</div>
+    </div>
+  </div>
+
+  <div class="prog-wrap">
+    <div class="prog-track"><div class="prog-fill" id="pf"></div></div>
+    <div class="prog-lbl" id="pl"></div>
+  </div>
+  <div class="ctx" id="ctx"></div>
+  <div class="qa-row" id="qa-row"></div>
+  <div id="planner-scroll"><div id="planner-body"></div></div>
+
+  <div class="bottom-bar">
+    <div class="chat-shell" id="chat-shell">
+      <div class="msgs" id="msgs"></div>
+      <div class="chat-input-row">
+        <textarea id="chat-inp" placeholder="Ask anything or describe your day…" rows="1" oninput="onInpChange()"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMsg()">↑</button>
+        <button class="mic-btn" id="mic-btn" onclick="toggleMic()">🎙</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NAP OVERLAY -->
+<div id="nap-overlay">
+  <div class="nap-icon">😴</div>
+  <div class="nap-title">Enjoy your rest</div>
+  <div class="nap-countdown" id="nap-cnt">1:00:00</div>
+  <div class="nap-sub" id="nap-sub">Picking back up at the right time</div>
+  <button class="nap-cancel" onclick="cancelNap()">Wake up early</button>
+</div>
+
+<!-- BREAK MODAL -->
+<div class="break-overlay" id="break-overlay" onclick="breakBgClick(event)">
+  <div class="break-card">
+    <div class="break-title">Add a break</div>
+    <div class="break-sub">Pushes all timings forward</div>
+    <div class="break-pills">
+      <div class="break-pill" onclick="selBreak(5,this)">5 min</div>
+      <div class="break-pill on" onclick="selBreak(10,this)">10 min</div>
+      <div class="break-pill" onclick="selBreak(15,this)">15 min</div>
+      <div class="break-pill" onclick="selBreak(20,this)">20 min</div>
+      <div class="break-pill" onclick="selBreak(30,this)">30 min</div>
+      <div class="break-pill" onclick="selBreak(45,this)">45 min</div>
+      <div class="break-pill" onclick="selBreak(60,this)">1 hour</div>
+    </div>
+    <button class="break-ok" onclick="doBreak()">Add break</button>
+    <button class="break-cancel" onclick="closeBreak()">Cancel</button>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="overlay" id="settings-overlay" onclick="settingsBgClick(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Settings</div>
+    <div class="tab-bar">
+      <div class="stab on" id="stab-routine" onclick="switchTab('routine')">Routine</div>
+      <div class="stab" id="stab-rep" onclick="switchTab('rep')">Rep</div>
+      <div class="stab" id="stab-admin" onclick="switchTab('admin')">Admin</div>
+      <div class="stab" id="stab-yoga" onclick="switchTab('yoga')">Yoga</div>
+      <div class="stab" id="stab-sync" onclick="switchTab('sync')">Sync</div>
+      <div class="stab" id="stab-api" onclick="switchTab('api')">API</div>
+    </div>
+
+    <div class="tab-pane on" id="tp-routine">
+      <div class="flbl">Jordi routine steps</div>
+      <textarea id="ed-routine" placeholder="One step per line&#10;Title — X min|Detail notes&#10;&#10;Update whenever Jordi changes the routine."></textarea>
+      <div class="mnote">Format: Title — X min|Detail. The detail after | appears as a sub-note. Update whenever Jordi changes something.</div>
+    </div>
+    <div class="tab-pane" id="tp-rep">
+      <div class="flbl">Current repertoire</div>
+      <textarea id="ed-rep" placeholder="One tune per line&#10;Birdlike — 20 min|Spoken voice, bebop&#10;&#10;Update when gigs change."></textarea>
+      <div class="mnote">Format: Tune — X min|Voice placement + notes. Swap these out as gigs come and go.</div>
+    </div>
+    <div class="tab-pane" id="tp-admin">
+      <div class="flbl">Daily admin tasks</div>
+      <textarea id="ed-admin" placeholder="One task per line&#10;Inbox + teaching admin — 20 min"></textarea>
+      <div class="mnote">These appear every day at the top. Keep it short — 2-3 items max.</div>
+    </div>
+    <div class="tab-pane" id="tp-yoga">
+      <div class="flbl">Yoga routines</div>
+      <textarea id="ed-yoga" placeholder="One routine per line&#10;Somatic yoga — flex|https://youtube.com/...&#10;30-day plan — 20 min&#10;Yoga for weight loss — 30 min|https://youtube.com/watch?v=..."></textarea>
+      <div class="mnote">Format: Name — duration|YouTube URL (optional). Duration can be 'flex' if variable. These appear in your morning yoga section.</div>
+    </div>
+    <div class="tab-pane" id="tp-sync">
+      <div class="sync-box">
+        <div class="sync-box-title">Save to Gmail</div>
+        <div class="sync-box-sub">1. Tap Copy below<br>2. Go to Claude.ai<br>3. Say "save my app data" and paste</div>
+        <button class="gbtn" onclick="copyForSync()">Copy data for Claude</button>
+        <div class="sync-confirm" id="copy-ok">Copied! Paste into Claude.ai</div>
+      </div>
+      <div class="sync-box">
+        <div class="sync-box-title">Load from Gmail</div>
+        <div class="sync-box-sub">1. In Claude.ai say "load my app data"<br>2. Copy the JSON it gives you<br>3. Paste below and tap Restore</div>
+        <textarea id="restore-inp" placeholder="Paste sync data here..." style="min-height:60px;font-family:var(--mono);font-size:11px;margin-bottom:6px"></textarea>
+        <button class="gbtn" onclick="doRestore()">Restore</button>
+        <div class="sync-confirm" id="restore-ok">Restored successfully!</div>
+        <div class="sync-error" id="restore-err">Invalid data — check you copied the full JSON.</div>
+      </div>
+      <button class="gbtn" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border2);margin-top:4px" onclick="exportTxt()">Export backup (.txt)</button>
+    </div>
+    <div class="tab-pane" id="tp-api">
+      <div class="api-box">
+        <label>Anthropic API key</label>
+        <input type="password" id="api-inp" placeholder="sk-ant-...">
+      </div>
+      <div class="mnote">Used for the voice assistant and AI planning. Stored locally only.</div>
+      <div class="dzone">
+        <button class="dbtn" onclick="clearToday()">Clear today's progress</button>
+        <button class="dbtn" onclick="clearAll()">Reset everything</button>
+      </div>
+    </div>
+
+    <div class="sheet-footer">
+      <button class="mbn cancel" onclick="closeSettings()">Cancel</button>
+      <button class="mbn save" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════
+// CORE STATE
+// ═══════════════════════════════════════════════════════
+var API_KEY='';
+var STATE={};
+var SETTINGS={};
+var TIMERS={};
+var EXP={};
+var START_OFF=0;
+var SEL_BREAK=10;
+var NAP_IV=null;
+var NAP_END=null;
+var SR=null;
+var IS_LISTENING=false;
+var BLOCKS=[];
+var CUSTOM_BLOCKS=null; // null = use template, array = custom day
+
+var DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var NOW=new Date();
+var DAY=DAYS[NOW.getDay()];
+var DAY_KEY=NOW.toISOString().split('T')[0];
+var SK='fd2-state-'+DAY_KEY;
+var SETK='fd2-settings';
+var APIK='fd-apikey';
+
+// ═══════════════════════════════════════════════════════
+// DEFAULTS
+// ═══════════════════════════════════════════════════════
+var DEF_ROUTINE=[
+  'Meditation — 6 min',
+  'Jordi breathing exercise — 5 min',
+  'Mouthpiece buzzing — 15 min|Pass 1 slurred: air→sing→air→buzz. Rest. Pass 2: 2 articulations per pitch. Hot air. Open system.',
+  '6th flexibility — 15 min|Discover ×2: sing→find sound, spongy lips, willing to miss. Train ×5: copy sound only. Play to end of air.',
+  'Octave flexibility — 15 min|Discover ×2 / train ×5. Upper note: same embouchure, inner vocalising does the work. Speed = safety.',
+  'Singing + playing game — 15 min|Pure music, emotions only. 2 bars sing / 2 bars play / mix freely.'
+];
+var DEF_REP=[
+  'Birdlike + Up Jumped Spring — 20 min|Spoken voice, bebop. Sing with articulation first.',
+  'Comecar De Novo + Terrestris + Tangerine — 20 min|Comecar: flugel, singer voice. Tangerine: Skymasters reference first.',
+  'Speak No Evil + Dear John — 15 min|Witch Hunt intro. Train mode — beautiful intonation.'
+];
+var DEF_ADMIN=[
+  'Inbox + teaching admin — 20 min',
+  'Fretless admin — 15 min'
+];
+var DEF_YOGA=[
+  'Somatic yoga — flex|https://www.youtube.com/results?search_query=somatic+yoga',
+  '30-day yoga plan — 20 min',
+  'Yoga for weight loss — 30 min|https://www.youtube.com/results?search_query=yoga+for+weight+loss+adriene'
+];
+
+var CTX={
+  Monday:'<b>Lena</b> with you until 12:45. Lunch 12pm. <b>Wife</b> teaching. <b>Free</b> from 1pm. Pickup 5:30pm.',
+  Tuesday:'<b>Lena</b> at grandparents 8:30→nursery→wife collects. <b>Free 8:30–12:15</b> — best practice block. <b>Teaching</b> Amersham 1–5pm.',
+  Wednesday:'<b>Lena</b> with you until 12:45. Lunch 12pm. <b>Wife</b> teaching. <b>Free</b> from 1pm. Pickup 5:30pm.',
+  Thursday:'<b>Lena</b> nursery drop 8am (you). Back 1pm with wife. <b>Free 8am–1pm</b> — strong practice block.',
+  Friday:'<b>Lena</b> with you until 12:45. Lunch 12pm. <b>Wife</b> teaching. <b>Free</b> from 1pm.',
+  Saturday:'<b>Family Amersham</b> 9:45–1:15. <b>Weekly reset</b> with wife 1:15pm. <b>Gig dep</b> ~7pm.',
+  Sunday:'<b>Church</b> 9:10 or 11:10. Family day, light gig prep. <b>Gig dep</b> ~5pm.'
+};
+
+// ═══════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════
+(function(){
+  var k=localStorage.getItem(APIK);
+  if(k){API_KEY=k;initApp();}
+  else{document.getElementById('setup').style.display='flex';}
+})();
+
+function startApp(){
+  var k=document.getElementById('setup-key').value.trim();
+  if(!k){alert('Please enter your API key');return;}
+  API_KEY=k;localStorage.setItem(APIK,k);initApp();
+}
+
+function initApp(){
+  document.getElementById('setup').style.display='none';
+  var app=document.getElementById('app');
+  app.style.display='flex';app.style.flexDirection='column';
+  loadSettings();loadState();
+  setupHeader();buildAndRender();startClock();initSpeech();
+}
+
+function loadSettings(){
+  try{var s=localStorage.getItem(SETK);SETTINGS=s?JSON.parse(s):{};}catch(e){SETTINGS={};}
+  if(!SETTINGS||typeof SETTINGS!=='object')SETTINGS={};
+  if(!Array.isArray(SETTINGS.routine))SETTINGS.routine=DEF_ROUTINE;
+  if(!Array.isArray(SETTINGS.rep))SETTINGS.rep=DEF_REP;
+  if(!Array.isArray(SETTINGS.admin))SETTINGS.admin=DEF_ADMIN;
+  if(!Array.isArray(SETTINGS.yoga))SETTINGS.yoga=DEF_YOGA;
+}
+function saveSettingsData(){localStorage.setItem(SETK,JSON.stringify(SETTINGS));}
+
+function loadState(){
+  try{
+    var s=localStorage.getItem(SK);
+    if(s){var d=JSON.parse(s);STATE=d.state||{};START_OFF=d.offset||0;CUSTOM_BLOCKS=d.custom||null;}
+  }catch(e){STATE={};START_OFF=0;CUSTOM_BLOCKS=null;}
+}
+function saveState(){
+  localStorage.setItem(SK,JSON.stringify({state:STATE,offset:START_OFF,custom:CUSTOM_BLOCKS}));
+}
+
+// ═══════════════════════════════════════════════════════
+// HEADER
+// ═══════════════════════════════════════════════════════
+function setupHeader(){
+  var opts={weekday:'long',day:'numeric',month:'long'};
+  document.getElementById('hdr-date').textContent=NOW.toLocaleDateString('en-GB',opts);
+  document.getElementById('hdr-sub').textContent=DAY;
+  document.getElementById('ctx').innerHTML=CTX[DAY]||'';
+  updateClock();buildQA();
+}
+function startClock(){updateClock();setInterval(function(){updateClock();buildAndRender();},60000);}
+function updateClock(){
+  document.getElementById('hdr-clock').textContent=
+    new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+function buildQA(){
+  var d=NOW.getDay();
+  var actions=[
+    {l:'▶ Start now',f:'startNow()'},
+    {l:'☕ Break',f:'openBreak()'},
+    {l:'😴 Nap',f:'openNapFromQA()'},
+    {l:'📧 Emails',f:'ask("What emails need action today?")'},
+    {l:'🎺 Gig details',f:'ask("What are my upcoming gig details?")'},
+    {l:'📅 Plan my day',f:'ask("Help me plan today based on what I have on")'}
+  ];
+  if(d===5||d===6)actions.push({l:'🎬 Ritz prep',f:'ask("Quick summary of everything I need for the Ritz gig")',g:true});
+  document.getElementById('qa-row').innerHTML=actions.map(function(a){
+    return '<div class="qa-pill'+(a.g?' gold':'')+'" onclick="'+a.f+'">'+a.l+'</div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// BLOCK BUILDING
+// ═══════════════════════════════════════════════════════
+function mfm(d){return d.getHours()*60+d.getMinutes();}
+function addM(d,m){return new Date(d.getTime()+m*60000);}
+function fmtC(d){return d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}
+function fmtT(s){var neg=s<0;var a=Math.abs(s);var m=Math.floor(a/60);var sc=a%60;return(neg?'-':'')+m+':'+(sc<10?'0':'')+sc;}
+
+function mkB(id,title,sub,dur,diary,pain,tmins,rest,yturl,btype){
+  return{id:id,title:title,sub:sub||'',dur:dur,diary:diary||'',pain:!!pain,tmins:tmins||0,rest:!!rest,yturl:yturl||'',btype:btype||''};
+}
+
+function buildBlocks(){
+  // Defensive: ensure settings arrays exist before forEach
+  if(!Array.isArray(SETTINGS.routine))SETTINGS.routine=DEF_ROUTINE;
+  if(!Array.isArray(SETTINGS.rep))SETTINGS.rep=DEF_REP;
+  if(!Array.isArray(SETTINGS.admin))SETTINGS.admin=DEF_ADMIN;
+  if(!Array.isArray(SETTINGS.yoga))SETTINGS.yoga=DEF_YOGA;
+  if(CUSTOM_BLOCKS){
+    BLOCKS=CUSTOM_BLOCKS.map(function(b){return Object.assign({},b);});
+    computeTimes();return;
+  }
+  BLOCKS=[];
+  var d=NOW.getDay();
+
+  // Admin
+  SETTINGS.admin.forEach(function(line,i){
+    var p=line.split('—');var t=p[0].trim();var r=p.slice(1).join('—').trim();
+    var dm=r.match(/(\d+)\s*min/);var dur=dm?parseInt(dm[1]):20;
+    BLOCKS.push(mkB('admin-'+i,t,r,dur,'Notes while fresh',false,dur,'','','admin'));
+  });
+
+  // Saturday weekly reset
+  if(d===6)BLOCKS.push(mkB('sat-reset','Weekly reset with wife','Review week, confirm couple evening, flag clashes',30,'What did you align on?',false,30,'','','family'));
+
+  // Athlete prep
+  BLOCKS.push(mkB('pain-pre','Pre-session pain check-in','Rate before anything. Your baseline for today.',3,'',true,0,'','','pain'));
+  BLOCKS.push(mkB('box','Box breathing — 5 min','4 in · 4 hold · 4 out · 4 hold · ×5. Reduces jaw tension + pain sensitisation.',5,'',false,5,'','','breath'));
+  BLOCKS.push(mkB('yoga-scan','Body scan + yoga sequence — 10 min','Cat-cow ×10 · child\'s pose · thread-the-needle · chin tucks · ear-to-shoulder. Observe tension — witness, don\'t fix.',10,'Where is the tension today?',false,10,'','','yoga'));
+
+  // Jordi routine
+  SETTINGS.routine.forEach(function(line,i){
+    var pi=line.indexOf('|');var main=pi>-1?line.slice(0,pi):line;var sub=pi>-1?line.slice(pi+1):'';
+    var p=main.split('—');var t=p[0].trim();var r=p.slice(1).join('—').trim();
+    var dm=r.match(/(\d+)/);var dur=dm?parseInt(dm[1]):15;
+    BLOCKS.push(mkB('jordi-'+i,t,sub||r,dur,'Diary note',false,dur,'','','jordi'));
+  });
+
+  // Mid-session recovery
+  BLOCKS.push(mkB('recovery','Mid-session recovery — 12 min','Horn down. Walk · forward fold · back extension · jaw massage · hydrate · lie flat.',12,'',true,12,'','','recovery'));
+
+  // Ritz sprints (Fri + Sat)
+  if(d===5||d===6){
+    BLOCKS.push(mkB('ritz1','Sprint 1 — Rhythm is Our Business','Spoken voice. Sing with articulation + swing first. Hard stop 12 min.',12,'',false,12,'','','ritz'));
+    BLOCKS.push(mkB('ritz-r1','REST 8 min — horn down','Shoulder rolls, jaw massage, hydrate',8,'',false,0,true,'','rest'));
+    BLOCKS.push(mkB('ritz2','Sprint 2 — On the Street Where You Live','Singer voice — lyrical. Vibrato first. Talking-level air. Hard stop 12 min.',12,'',false,12,'','','ritz'));
+    BLOCKS.push(mkB('ritz-r2','REST 8 min','Neck stretches, back extension, pain check',8,'',false,0,true,'','rest'));
+    BLOCKS.push(mkB('ritz3','Sprint 3 — Puttin\' on the Ritz','Nose sound. Full character. This gets filmed. Hard stop 12 min.',12,'Which chart most secure?',false,12,'','','ritz'));
+    BLOCKS.push(mkB('ritz-r3','Full break 15 min','Leave room, walk, water, lie flat. Arrive at rep fresh.',15,'',false,0,true,'','rest'));
+  }
+
+  // Repertoire
+  SETTINGS.rep.forEach(function(line,i){
+    var pi=line.indexOf('|');var main=pi>-1?line.slice(0,pi):line;var sub=pi>-1?line.slice(pi+1):'';
+    var p=main.split('—');var t=p[0].trim();var r=p.slice(1).join('—').trim();
+    var dm=r.match(/(\d+)/);var dur=dm?parseInt(dm[1]):20;
+    BLOCKS.push(mkB('rep-'+i,t,sub||r,dur,'Diary note',false,dur,'','','rep'));
+  });
+
+  // Close
+  BLOCKS.push(mkB('cooldown','Low long tones + cool-down — 10 min','Low register, pp. Spinal twist · knee hug · legs up wall · straw exercise.',10,'',false,10,'','','cool'));
+  BLOCKS.push(mkB('pain-post','Post-session pain score','Compare to pre-session. Diaphragmatic breathing, 5 slow breaths.',5,'',true,0,'','','pain'));
+  BLOCKS.push(mkB('diary','Practice diary — 5 min','Emotional notes only — feelings about the music, not technique.',5,'What was the emotional quality of today? What moment felt most alive?',false,0,'','','diary'));
+
+  computeTimes();
+}
+
+function computeTimes(){
+  var base=new Date();base.setHours(9,0,0,0);base=addM(base,START_OFF);
+  BLOCKS.forEach(function(b){
+    b.startTime=new Date(base);
+    if(STATE[b.id]&&STATE[b.id].finishedAt)base=new Date(STATE[b.id].finishedAt);
+    else base=addM(base,b.dur);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// SECTIONS MAP
+// ═══════════════════════════════════════════════════════
+var SECS=['Admin','Morning yoga','Athlete prep','Jordi routine','Mid-session recovery','Ritz sprints','Repertoire','Close'];
+function bSec(b){
+  var t=b.btype||'';
+  if(t==='admin'||b.id==='sat-reset')return'Admin';
+  if(t==='yoga'||b.id.startsWith('yoga'))return'Morning yoga';
+  if(t==='pain'||t==='breath'||b.id.startsWith('box')||b.id.startsWith('yoga-scan'))return'Athlete prep';
+  if(t==='jordi')return'Jordi routine';
+  if(t==='recovery')return'Mid-session recovery';
+  if(t==='ritz'||t==='rest')return'Ritz sprints';
+  if(t==='rep')return'Repertoire';
+  return'Close';
+}
+
+// ═══════════════════════════════════════════════════════
+// STATE HELPERS
+// ═══════════════════════════════════════════════════════
+function isTicked(id){return!!(STATE[id]&&STATE[id].ticked);}
+function isSkipped(id){return!!(STATE[id]&&STATE[id].skipped);}
+function isDone(id){return isTicked(id)||isSkipped(id);}
+function getNote(id){return(STATE[id]&&STATE[id].note)||'';}
+function getPain(id,f){return(STATE[id]&&STATE[id]['p_'+f])||'';}
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+function buildAndRender(){
+  buildBlocks();
+  var nowM=mfm(new Date());
+  var secMap={};SECS.forEach(function(s){secMap[s]=[];});
+  BLOCKS.forEach(function(b){secMap[bSec(b)].push(b);});
+  var html='';
+  SECS.forEach(function(sec){
+    var items=secMap[sec];if(!items||!items.length)return;
+    var inner='';
+    items.forEach(function(b){
+      var sm=mfm(b.startTime);
+      var isActive=nowM>=sm&&nowM<sm+b.dur&&!isDone(b.id);
+      var tstr=fmtC(b.startTime);
+      // Rest blocks
+      if(b.rest){
+        inner+='<div class="rest-block"><div class="rest-dot"></div><div><div class="rest-txt">'+b.title+'</div>'+(b.sub?'<div class="rest-sub">'+b.sub+'</div>':'')+'</div></div>';
+        return;
+      }
+      // Body
+      var body='';
+      if(b.tmins>0){
+        var tid='tmr-'+b.id;
+        if(!TIMERS[tid])TIMERS[tid]={rem:b.tmins*60,running:false,stopped:false};
+        body+='<div class="t-row">'
+          +'<div class="t-disp'+(TIMERS[tid].running?' go':TIMERS[tid].stopped?' stopped':'')+'" id="'+tid+'">'+fmtT(TIMERS[tid].rem)+'</div>'
+          +'<button class="t-btn" onclick="startT(\''+tid+'\','+b.tmins+')">Start</button>'
+          +'<button class="t-btn stop-btn" onclick="stopT(\''+tid+'\')">Stop</button>'
+          +'<button class="t-btn" onclick="resetT(\''+tid+'\','+b.tmins+')">Reset</button>'
+          +'</div>';
+      }
+      if(b.pain){
+        body+='<div class="pain-grid">'
+          +['Back','Neck','Jaw','Fatigue'].map(function(f){
+            var fl=f.toLowerCase();
+            return'<div class="pain-cell"><label>'+f+'</label>'
+              +'<input type="number" min="1" max="10" id="pain-'+fl+'-'+b.id+'" value="'+getPain(b.id,fl)+'"'
+              +' oninput="onPain(\''+b.id+'\',\''+fl+'\')" placeholder="—"></div>';
+          }).join('')
+          +'</div><div class="jaw-warn" id="jw-'+b.id+'">⚠ Jaw above 6 — Ritz at mp only</div>';
+      }
+      if(b.yturl){
+        body+='<a class="yt-link" href="'+b.yturl+'" target="_blank">▶ Watch on YouTube</a>';
+      }
+      if(b.diary){
+        body+='<div class="dlbl">Diary</div>'
+          +'<textarea id="note-'+b.id+'" oninput="onNote(\''+b.id+'\')" placeholder="'+b.diary+'">'+getNote(b.id)+'</textarea>';
+      }
+      var ticked=isTicked(b.id);var skipped=isSkipped(b.id);var done=ticked||skipped;
+      inner+='<div class="item'+(done?' done':'')+(skipped?' skipped':'')+(isActive?' active':'')+'" id="item-'+b.id+'" draggable="true" ondragstart="dragStart(event,\''+b.id+'\')" ondragover="dragOver(event,\''+b.id+'\')" ondrop="dragDrop(event,\''+b.id+'\')" ondragend="dragEnd(event)" ontouchstart="touchStart(event,\''+b.id+'\')" ontouchend="touchEnd(event)">'
+        +'<div class="item-hd" onclick="toggleExp(\''+b.id+'\')">'
+        +'<div class="drag-handle" onclick="event.stopPropagation()">⠿</div>'
+        +'<div class="cb'+(ticked?' ticked':skipped?' skipped-cb':'')+'" id="cb-'+b.id+'" onclick="event.stopPropagation();tick(\''+b.id+'\')"></div>'
+        +'<div class="item-meta">'
+        +'<div class="item-time-row">'
+        +'<span class="item-time">'+tstr+'</span>'
+        +'<span class="item-dur">· '+b.dur+'min</span>'
+        +(isActive?'<span class="badge badge-now">now</span>':'')
+        +(skipped?'<span class="badge badge-skip">skipped</span>':'')
+        +(b.yturl?'<span class="badge badge-yt" onclick="event.stopPropagation();openLink(\''+b.yturl+'\')">▶ YT</span>':'')
+        +'</div>'
+        +'<div class="item-title">'+b.title+'</div>'
+        +(b.sub?'<div class="item-sub">'+b.sub+'</div>':'')
+        +'</div>'
+        +'<div class="item-actions">'
+        +'<div class="act-btn danger" onclick="event.stopPropagation();skip(\''+b.id+'\')" title="'+(skipped?'Unskip':'Skip')+'">'+(skipped?'↩':'↷')+'</div>'
+        +'<div class="act-btn" onclick="event.stopPropagation();toggleExp(\''+b.id+'\')">'+(EXP[b.id]?'−':'+')+'</div>'
+        +'</div>'
+        +'</div>'
+        +(body?'<div class="item-body" id="ib-'+b.id+'" style="display:'+(EXP[b.id]?'block':'none')+'">'+body+'</div>':'')
+        +'</div>';
+    });
+    if(!inner)return;
+    html+='<div class="sec-wrap">'
+      +'<div class="sec-hd" onclick="toggleSec(this)">'+sec+' <span class="sec-hd-arrow">▾</span></div>'
+      +'<div class="sec-body" id="sb-'+sec.replace(/\s+/g,'-')+'">'+inner+'</div>'
+      +'</div>';
+  });
+  document.getElementById('planner-body').innerHTML=html;
+  updateProg();
+}
+
+function updateProg(){
+  var total=BLOCKS.filter(function(b){return!b.rest;}).length;
+  var done=BLOCKS.filter(function(b){return!b.rest&&isDone(b.id);}).length;
+  var skips=BLOCKS.filter(function(b){return!b.rest&&isSkipped(b.id);}).length;
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('pf').style.width=pct+'%';
+  document.getElementById('pl').textContent=done+' of '+total+' complete'+(skips?' ('+skips+' skipped)':'')+' · '+pct+'%';
+}
+
+function openLink(url){window.open(url,'_blank');}
+
+// ═══════════════════════════════════════════════════════
+// INTERACTIONS
+// ═══════════════════════════════════════════════════════
+function tick(id){
+  if(!STATE[id])STATE[id]={};
+  STATE[id].ticked=!STATE[id].ticked;
+  if(STATE[id].ticked){STATE[id].finishedAt=new Date().toISOString();STATE[id].skipped=false;}
+  else delete STATE[id].finishedAt;
+  saveState();buildAndRender();
+}
+function skip(id){
+  if(!STATE[id])STATE[id]={};
+  STATE[id].skipped=!STATE[id].skipped;
+  if(STATE[id].skipped){STATE[id].finishedAt=new Date().toISOString();STATE[id].ticked=false;}
+  else delete STATE[id].finishedAt;
+  saveState();buildAndRender();
+}
+function toggleExp(id){
+  var b=document.getElementById('ib-'+id);if(!b)return;
+  EXP[id]=!EXP[id];b.style.display=EXP[id]?'block':'none';
+  var e=document.querySelector('#item-'+id+' .act-btn:last-child');
+  if(e)e.textContent=EXP[id]?'−':'+';
+}
+function toggleSec(hd){
+  var body=hd.nextElementSibling;var arrow=hd.querySelector('.sec-hd-arrow');
+  var h=body.style.display==='none';
+  body.style.display=h?'block':'none';
+  hd.classList.toggle('collapsed',!h);
+}
+function onNote(id){
+  var el=document.getElementById('note-'+id);if(!el)return;
+  if(!STATE[id])STATE[id]={};STATE[id].note=el.value;saveState();
+}
+function onPain(id,f){
+  var el=document.getElementById('pain-'+f+'-'+id);if(!el)return;
+  if(!STATE[id])STATE[id]={};STATE[id]['p_'+f]=el.value;
+  if(f==='jaw'){var w=document.getElementById('jw-'+id);if(w)w.style.display=parseInt(el.value)>6?'block':'none';}
+  saveState();
+}
+
+// ═══════════════════════════════════════════════════════
+// TIMERS
+// ═══════════════════════════════════════════════════════
+function startT(tid,mins){
+  if(TIMERS[tid]&&TIMERS[tid].iv)return;
+  if(!TIMERS[tid])TIMERS[tid]={rem:mins*60,running:false,stopped:false};
+  TIMERS[tid].running=true;TIMERS[tid].stopped=false;
+  var el=document.getElementById(tid);
+  TIMERS[tid].iv=setInterval(function(){
+    TIMERS[tid].rem--;
+    if(el){el.textContent=fmtT(TIMERS[tid].rem);el.className='t-disp '+(TIMERS[tid].rem>0?'go':'over');}
+  },1000);
+}
+function stopT(tid){
+  if(TIMERS[tid]&&TIMERS[tid].iv){clearInterval(TIMERS[tid].iv);TIMERS[tid].iv=null;}
+  if(TIMERS[tid]){TIMERS[tid].running=false;TIMERS[tid].stopped=true;}
+  var el=document.getElementById(tid);if(el)el.className='t-disp stopped';
+}
+function resetT(tid,mins){
+  if(TIMERS[tid]&&TIMERS[tid].iv)clearInterval(TIMERS[tid].iv);
+  TIMERS[tid]={rem:mins*60,running:false,stopped:false};
+  var el=document.getElementById(tid);if(el){el.textContent=fmtT(mins*60);el.className='t-disp';}
+}
+
+// ═══════════════════════════════════════════════════════
+// DRAG AND DROP (touch + mouse)
+// ═══════════════════════════════════════════════════════
+var DRAG_ID=null;var TOUCH_Y0=0;var TOUCH_ID=null;var TOUCH_MOVED=false;
+function dragStart(e,id){DRAG_ID=id;e.dataTransfer.effectAllowed='move';document.getElementById('item-'+id).classList.add('dragging');}
+function dragOver(e,id){e.preventDefault();if(id===DRAG_ID)return;document.getElementById('item-'+id).classList.add('drag-over');}
+function dragDrop(e,id){
+  e.preventDefault();
+  document.querySelectorAll('.drag-over').forEach(function(el){el.classList.remove('drag-over');});
+  if(!DRAG_ID||id===DRAG_ID)return;
+  reorder(DRAG_ID,id);DRAG_ID=null;
+}
+function dragEnd(e){
+  DRAG_ID=null;
+  document.querySelectorAll('.dragging,.drag-over').forEach(function(el){el.classList.remove('dragging','drag-over');});
+}
+function touchStart(e,id){
+  TOUCH_ID=id;TOUCH_Y0=e.touches[0].clientY;TOUCH_MOVED=false;
+}
+function touchEnd(e){
+  if(!TOUCH_MOVED)return;
+  var el=document.elementFromPoint(e.changedTouches[0].clientX,e.changedTouches[0].clientY);
+  var target=el&&el.closest('.item');
+  if(target&&TOUCH_ID){
+    var targetId=target.id.replace('item-','');
+    if(targetId!==TOUCH_ID)reorder(TOUCH_ID,targetId);
+  }
+  TOUCH_ID=null;
+}
+function reorder(fromId,toId){
+  if(CUSTOM_BLOCKS){
+    var fi=CUSTOM_BLOCKS.findIndex(function(b){return b.id===fromId;});
+    var ti=CUSTOM_BLOCKS.findIndex(function(b){return b.id===toId;});
+    if(fi<0||ti<0)return;
+    var b=CUSTOM_BLOCKS.splice(fi,1)[0];CUSTOM_BLOCKS.splice(ti,0,b);
+  }else{
+    var fi2=BLOCKS.findIndex(function(b){return b.id===fromId;});
+    var ti2=BLOCKS.findIndex(function(b){return b.id===toId;});
+    if(fi2<0||ti2<0)return;
+    CUSTOM_BLOCKS=BLOCKS.slice();
+    var b2=CUSTOM_BLOCKS.splice(fi2,1)[0];CUSTOM_BLOCKS.splice(ti2,0,b2);
+  }
+  saveState();buildAndRender();
+  sysMsg('Reordered — timings updated');
+}
+
+// ═══════════════════════════════════════════════════════
+// BREAK + NAP + TIMING
+// ═══════════════════════════════════════════════════════
+function startNow(){
+  var base=new Date();base.setHours(9,0,0,0);
+  START_OFF=Math.round((new Date()-base)/60000);
+  saveState();buildAndRender();sysMsg('Timings updated from now');
+}
+function openBreak(){document.getElementById('break-overlay').classList.add('open');}
+function closeBreak(){document.getElementById('break-overlay').classList.remove('open');}
+function breakBgClick(e){if(e.target===document.getElementById('break-overlay'))closeBreak();}
+function selBreak(m,el){SEL_BREAK=m;document.querySelectorAll('.break-pill').forEach(function(p){p.classList.remove('on');});el.classList.add('on');}
+function doBreak(){START_OFF+=SEL_BREAK;saveState();closeBreak();buildAndRender();sysMsg('Break added — '+SEL_BREAK+' min pushed forward');}
+
+function openNapFromQA(){
+  var txt=prompt('How long do you want to nap? (e.g. "1 hour", "45 min", "90 min")');
+  if(!txt)return;
+  var mins=parseNapMins(txt);
+  if(!mins){alert('Could not understand that — try "1 hour" or "45 min"');return;}
+  startNap(mins);
+}
+function parseNapMins(txt){
+  txt=txt.toLowerCase();
+  var h=txt.match(/(\d+)\s*h/);var m=txt.match(/(\d+)\s*min/);
+  var total=0;
+  if(h)total+=parseInt(h[1])*60;
+  if(m)total+=parseInt(m[1]);
+  if(!total){var n=txt.match(/(\d+)/);if(n)total=parseInt(n[1]);}
+  return total||0;
+}
+function startNap(mins){
+  START_OFF+=mins;saveState();
+  NAP_END=new Date(new Date().getTime()+mins*60000);
+  var over=document.getElementById('nap-overlay');
+  over.style.display='flex';
+  document.getElementById('nap-sub').textContent='Resuming at '+fmtC(NAP_END)+' · timings pushed forward by '+mins+' min';
+  updateNapCnt();
+  NAP_IV=setInterval(function(){
+    var rem=Math.max(0,Math.round((NAP_END-new Date())/1000));
+    if(rem<=0){clearInterval(NAP_IV);cancelNap();sysMsg('Welcome back! Timings adjusted.');}
+    else updateNapCnt();
+  },1000);
+}
+function updateNapCnt(){
+  if(!NAP_END)return;
+  var rem=Math.max(0,Math.round((NAP_END-new Date())/1000));
+  var h=Math.floor(rem/3600);var m=Math.floor((rem%3600)/60);var s=rem%60;
+  document.getElementById('nap-cnt').textContent=(h>0?h+':':'')+(m<10&&h>0?'0':'')+m+':'+(s<10?'0':'')+s;
+}
+function cancelNap(){
+  if(NAP_IV)clearInterval(NAP_IV);NAP_IV=null;NAP_END=null;
+  document.getElementById('nap-overlay').style.display='none';
+  buildAndRender();
+}
+
+// ═══════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════
+function openSettings(){
+  document.getElementById('ed-routine').value=SETTINGS.routine.join('\n');
+  document.getElementById('ed-rep').value=SETTINGS.rep.join('\n');
+  document.getElementById('ed-admin').value=SETTINGS.admin.join('\n');
+  document.getElementById('ed-yoga').value=SETTINGS.yoga.join('\n');
+  document.getElementById('api-inp').value=API_KEY||'';
+  document.getElementById('settings-overlay').classList.add('open');
+}
+function closeSettings(){document.getElementById('settings-overlay').classList.remove('open');}
+function settingsBgClick(e){if(e.target===document.getElementById('settings-overlay'))closeSettings();}
+var ATAB='routine';
+function switchTab(t){
+  ATAB=t;
+  ['routine','rep','admin','yoga','sync','api'].forEach(function(x){
+    document.getElementById('stab-'+x).classList.toggle('on',x===t);
+    document.getElementById('tp-'+x).classList.toggle('on',x===t);
+  });
+}
+function saveSettings(){
+  SETTINGS.routine=document.getElementById('ed-routine').value.trim().split('\n').filter(Boolean);
+  SETTINGS.rep=document.getElementById('ed-rep').value.trim().split('\n').filter(Boolean);
+  SETTINGS.admin=document.getElementById('ed-admin').value.trim().split('\n').filter(Boolean);
+  SETTINGS.yoga=document.getElementById('ed-yoga').value.trim().split('\n').filter(Boolean);
+  var k=document.getElementById('api-inp').value.trim();
+  if(k){API_KEY=k;localStorage.setItem(APIK,k);}
+  saveSettingsData();closeSettings();TIMERS={};CUSTOM_BLOCKS=null;saveState();buildAndRender();
+}
+function clearToday(){if(confirm('Clear today?')){STATE={};START_OFF=0;CUSTOM_BLOCKS=null;saveState();TIMERS={};buildAndRender();closeSettings();}}
+function clearAll(){if(confirm('Reset everything?')){localStorage.clear();location.reload();}}
+
+// ═══════════════════════════════════════════════════════
+// SYNC
+// ═══════════════════════════════════════════════════════
+function getSyncPayload(){
+  var p={v:3,exported:new Date().toISOString(),settings:SETTINGS,states:{}};
+  Object.keys(localStorage).forEach(function(k){
+    if(k.startsWith('fd2-state-')||k.startsWith('fd-state-')){
+      try{p.states[k]=JSON.parse(localStorage.getItem(k));}catch(e){}
+    }
+  });
+  return JSON.stringify(p);
+}
+function copyForSync(){
+  var data='FREDDIE-APP-SYNC-DATA:\n'+getSyncPayload();
+  navigator.clipboard.writeText(data).then(function(){
+    var el=document.getElementById('copy-ok');el.style.display='block';setTimeout(function(){el.style.display='none';},3500);
+  }).catch(function(){
+    var ta=document.createElement('textarea');ta.value=data;
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    var el=document.getElementById('copy-ok');el.style.display='block';setTimeout(function(){el.style.display='none';},3500);
+  });
+}
+function doRestore(){
+  var inp=document.getElementById('restore-inp');
+  var ok=document.getElementById('restore-ok');var err=document.getElementById('restore-err');
+  ok.style.display='none';err.style.display='none';
+  var raw=inp.value.trim().replace(/^FREDDIE-APP-SYNC-DATA:\s*/,'');
+  try{
+    var p=JSON.parse(raw);if(!p.v||!p.settings)throw new Error();
+    SETTINGS=p.settings;saveSettingsData();
+    if(p.states)Object.keys(p.states).forEach(function(k){localStorage.setItem(k,JSON.stringify(p.states[k]));});
+    loadState();TIMERS={};buildAndRender();inp.value='';
+    ok.style.display='block';setTimeout(function(){ok.style.display='none';},3000);
+  }catch(e){err.style.display='block';setTimeout(function(){err.style.display='none';},4000);}
+}
+function exportTxt(){
+  var lines=['FREDDIE DAILY BACKUP — '+NOW.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}),''];
+  lines.push('Routine:');SETTINGS.routine.forEach(function(l){lines.push('  · '+l.split('|')[0]);});lines.push('');
+  lines.push('Repertoire:');SETTINGS.rep.forEach(function(l){lines.push('  · '+l.split('|')[0]);});lines.push('');
+  var noted=BLOCKS.filter(function(b){return!b.rest&&getNote(b.id);});
+  if(noted.length){lines.push('Diary notes:');noted.forEach(function(b){lines.push('');lines.push('  ['+b.title+']');lines.push('  '+getNote(b.id));});lines.push('');}
+  var blob=new Blob([lines.join('\n')],{type:'text/plain'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='freddie-'+DAY_KEY+'.txt';a.click();URL.revokeObjectURL(a.href);
+}
+
+// ═══════════════════════════════════════════════════════
+// VOICE
+// ═══════════════════════════════════════════════════════
+function initSpeech(){
+  var SR2=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR2)return;
+  SR=new SR2();SR.continuous=false;SR.interimResults=false;SR.lang='en-GB';
+  SR.onresult=function(e){
+    var t=e.results[0][0].transcript;
+    document.getElementById('chat-inp').value=t;
+    stopListening();sendMsg();
+  };
+  SR.onerror=SR.onend=function(){stopListening();};
+}
+function toggleMic(){if(IS_LISTENING)stopListening();else startListening();}
+function startListening(){
+  if(!SR){addMsg('Voice not supported in this browser. Try Chrome.','ai');return;}
+  IS_LISTENING=true;var btn=document.getElementById('mic-btn');
+  btn.classList.add('listening');btn.textContent='⏹';SR.start();
+}
+function stopListening(){
+  IS_LISTENING=false;var btn=document.getElementById('mic-btn');
+  btn.classList.remove('listening');btn.textContent='🎙';
+  if(SR)try{SR.stop();}catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════
+// CHAT
+// ═══════════════════════════════════════════════════════
+function onInpChange(){
+  var v=document.getElementById('chat-inp').value.trim();
+  document.getElementById('send-btn').style.display=v?'flex':'none';
+  document.getElementById('chat-shell').classList.toggle('active',!!v);
+  var ta=document.getElementById('chat-inp');ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,80)+'px';
+}
+function sendMsg(){
+  var inp=document.getElementById('chat-inp');
+  var msg=inp.value.trim();if(!msg)return;
+  inp.value='';inp.style.height='auto';
+  document.getElementById('send-btn').style.display='none';
+  ask(msg);
+}
+function ask(msg){
+  showMsgs();addMsg(msg,'user');
+  var thinking=addMsg('Thinking…','thinking');thinking.id='thinking-msg';
+  callClaude(msg);
+}
+function showMsgs(){var m=document.getElementById('msgs');m.style.display='block';}
+function addMsg(text,cls){
+  var m=document.getElementById('msgs');
+  var d=document.createElement('div');d.className='msg '+cls;d.textContent=text;
+  m.appendChild(d);m.scrollTop=m.scrollHeight;return d;
+}
+function sysMsg(text){showMsgs();addMsg(text,'system');}
+function removeThinking(){var el=document.getElementById('thinking-msg');if(el)el.remove();}
+
+async function callClaude(userMsg){
+  var btn=document.getElementById('mic-btn');btn.classList.add('thinking');btn.textContent='⋯';
+  var sys=buildSysPrompt(userMsg);
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,system:sys,messages:[{role:'user',content:userMsg}]})
+    });
+    var data=await res.json();
+    removeThinking();
+    var reply=(data.content&&data.content[0]&&data.content[0].text)||'Sorry, no response.';
+
+    // Check if Claude returned a custom day plan JSON - try multiple patterns
+    var plan=null;
+    // Pattern 1: ```json ... ```
+    var m1=reply.match(/```json\s*([\s\S]*?)\s*```/);
+    if(m1){try{var p1=JSON.parse(m1[1]);if(p1.blocks)plan=p1;}catch(e){}}
+    // Pattern 2: ``` ... ``` (no json label)
+    if(!plan){var m2=reply.match(/```\s*([\s\S]*?)\s*```/);if(m2){try{var p2=JSON.parse(m2[1]);if(p2.blocks)plan=p2;}catch(e){}}}
+    // Pattern 3: raw JSON object starting with {"blocks"
+    if(!plan){var m3=reply.match(/(\{"blocks"[\s\S]*\})/);if(m3){try{var p3=JSON.parse(m3[1]);if(p3.blocks)plan=p3;}catch(e){}}}
+    // Pattern 4: find first { and try to parse from there to end
+    if(!plan){var bi=reply.indexOf('{"blocks"');if(bi>-1){try{var p4=JSON.parse(reply.slice(bi));if(p4.blocks)plan=p4;}catch(e){}}}
+
+    if(plan&&Array.isArray(plan.blocks)){
+      applyCustomDay(plan);
+      var cleaned=reply.replace(/```json[\s\S]*?```/g,'').replace(/```[\s\S]*?```/g,'').replace(/\{"blocks"[\s\S]*$/,'').trim();
+      if(cleaned)addMsg(cleaned,'ai');
+      else addMsg('Done — custom day built. Drag items to reorder.','ai');
+      speak('Done. Custom day built.');
+      btn.classList.remove('thinking');btn.textContent='🎙';return;
+    }
+    // Check for nap instruction
+    var napMatch=reply.match(/NAP:(\d+)/);
+    if(napMatch){startNap(parseInt(napMatch[1]));reply=reply.replace(/NAP:\d+/,'').trim();}
+    // Check for break instruction
+    var breakMatch=reply.match(/BREAK:(\d+)/);
+    if(breakMatch){START_OFF+=parseInt(breakMatch[1]);saveState();buildAndRender();reply=reply.replace(/BREAK:\d+/,'').trim();}
+
+    addMsg(reply,'ai');speak(reply);
+  }catch(e){
+    removeThinking();addMsg('Connection error. Check your API key in Settings → API.','ai');
+  }
+  btn.classList.remove('thinking');btn.textContent='🎙';
+}
+
+function applyCustomDay(plan){
+  CUSTOM_BLOCKS=plan.blocks.map(function(b,i){
+    return mkB(b.id||'custom-'+i,b.title,b.sub||'',b.dur||15,b.diary||'',b.pain||false,b.tmins||0,b.rest||false,b.yturl||'',b.btype||'custom');
+  });
+  TIMERS={};saveState();buildAndRender();
+}
+
+function buildSysPrompt(userMsg){
+  var d=NOW.getDay();
+  var ticked=BLOCKS.filter(function(b){return!b.rest&&isTicked(b.id);}).map(function(b){return b.title;});
+  var rem=BLOCKS.filter(function(b){return!b.rest&&!isDone(b.id);}).slice(0,6).map(function(b){return b.title+'('+fmtC(b.startTime)+')';});
+  var yoga=(Array.isArray(SETTINGS.yoga)?SETTINGS.yoga:[]).map(function(l){return l.split('|')[0];}).join(', ');
+
+  var sys='You are Freddie Gavita\'s personal daily assistant and practice coach. Freddie is a professional jazz trumpet player based in the UK, self-employed, with a daughter Lena (4) and wife who is a reception teacher. Chronic pain: back, neck, shoulders, jaw. Works with trumpet teacher Jordi Albert on: discovering sounds not sensations, singing before playing, three modes (discover/train/play), voice placements (spoken/singer/nose). Building app called Fretless for musicians.'
+    +'\n\nToday is '+DAY+' '+DAY_KEY+'. Current time: '+fmtC(new Date())+'.'
+    +'\n\nCompleted: '+(ticked.length?ticked.join(', '):'nothing yet')+'.'
+    +'\n\nRemaining: '+(rem.length?rem.join(', '):'all done')+'.'
+    +'\n\nCurrent yoga routines: '+yoga+'.'
+    +'\n\nUpcoming gigs: Ritz LDO Saturday 11 April (regular). Ritz filming Thursday 16 April, rehearsal 5-6:30pm, filming 6:30-9:30pm. Need tux, dress shirt (not winged collar), patent shoes, groomed, iPad with 3 charts: Rhythm is Our Business (female), On the Street Where You Live (female), Puttin on the Ritz (Fred Astaire female). Reading Jazz Remix JO gig 24 April: Birdlike, Dear John, Comecar De Novo, Speak No Evil, Up Jumped Spring, Terrestris, Brownie, Asiatic Raes, Tangerine (finale).'
+    +'\n\nYou can perform these special actions by including them in your response:'
+    +'\n- To build a custom day plan: return a JSON block like: ```json\n{"blocks":[{"id":"b1","title":"Title","sub":"detail","dur":20,"diary":"prompt","tmins":20,"btype":"custom","yturl":""}]}\n``` with full block array. Include all necessary blocks for the day.'
+    +'\n- To start a nap: include NAP:60 (where 60 is minutes) in your response.'
+    +'\n- To add a break: include BREAK:15 (where 15 is minutes) in your response.'
+    +'\n\nWhen the user describes their day in natural language (e.g. "I want to do yoga, then the morning after warm-up, then watch football at 12:30, gig at 7pm"), build a custom day plan JSON with appropriate blocks. For yoga routines use the ones from settings. For the Morning After warm-up use btype "warmup". For rest/family/watch/food blocks use appropriate btypes. Always include pain check-in, body scan, and diary blocks. Set realistic durations.'
+    +'\n\nCRITICAL - When building a custom day plan, your response must contain ONLY the JSON block and nothing else before it. Start your response with the plain text intro (1-2 sentences max), then output the JSON on its own line starting with {"blocks": - no code fences needed, just raw JSON. The app will parse it automatically.'
+    +'\n\nJSON block format: {"blocks":[{"id":"b1","title":"Title","sub":"detail","dur":20,"diary":"prompt","tmins":20,"btype":"custom","yturl":"","rest":false,"pain":false}]}'
+    +'\n\nFor non-plan responses: be warm, concise, 2-4 sentences max.';
+  return sys;
+}
+
+function speak(text){
+  if(!window.speechSynthesis)return;
+  var short=text.replace(/```[\s\S]*?```/g,'').replace(/[#*_`]/g,'').slice(0,280);
+  var utt=new SpeechSynthesisUtterance(short);utt.lang='en-GB';utt.rate=1.05;
+  speechSynthesis.cancel();speechSynthesis.speak(utt);
+}
+</script>
+</body>
+</html>
