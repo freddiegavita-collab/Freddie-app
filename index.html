@@ -502,11 +502,11 @@ function buildQA(){
     {l:'▶ Start now',f:'startNow()'},
     {l:'☕ Break',f:'openBreak()'},
     {l:'😴 Nap',f:'openNapFromQA()'},
-    {l:'📧 Emails',f:'ask("What emails need action today?")'},
-    {l:'🎺 Gig details',f:'ask("What are my upcoming gig details?")'},
-    {l:'📅 Plan my day',f:'ask("Help me plan today based on what I have on")'}
+    {l:'📧 Emails',f:"ask('What emails need action today?')"},
+    {l:'🎺 Gig details',f:"ask('What are my upcoming gig details?')"},
+    {l:'📅 Plan my day',f:"ask('Help me plan today based on what I have on')"}
   ];
-  if(d===5||d===6)actions.push({l:'🎬 Ritz prep',f:'ask("Quick summary of everything I need for the Ritz gig")',g:true});
+  if(d===5||d===6)actions.push({l:'🎬 Ritz prep',f:"ask('Quick summary of everything I need for the Ritz gig')",g:true});
   document.getElementById('qa-row').innerHTML=actions.map(function(a){
     return '<div class="qa-pill'+(a.g?' gold':'')+'" onclick="'+a.f+'">'+a.l+'</div>';
   }).join('');
