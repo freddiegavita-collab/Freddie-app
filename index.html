@@ -162,6 +162,8 @@ textarea:focus{border-color:var(--border2)}
 .send-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--gold);color:#111;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0}
 .send-btn:active{background:var(--gold2)}
 .mic-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;transition:all .2s}
+.min-btn{width:26px;height:26px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);color:var(--text3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;font-family:var(--mono);flex-shrink:0;transition:all .15s;line-height:1}
+.min-btn:hover{color:var(--gold);border-color:var(--gold2)}
 .mic-btn.listening{background:var(--red);border-color:var(--red);color:#fff;animation:pulse 1s infinite}
 .mic-btn.thinking{background:var(--purple);border-color:var(--purple);color:#fff}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
@@ -256,6 +258,7 @@ textarea:focus{border-color:var(--border2)}
     <div class="chat-shell" id="chat-shell">
       <div class="msgs" id="msgs"></div>
       <div class="chat-input-row">
+        <button class="min-btn" id="min-btn" onclick="toggleChatMin()" title="Minimise">−</button>
         <textarea id="chat-inp" placeholder="Ask anything or describe your day…" rows="1" oninput="onInpChange()"></textarea>
         <button class="send-btn" id="send-btn" onclick="sendMsg()">↑</button>
         <button class="mic-btn" id="mic-btn" onclick="toggleMic()">🎙</button>
@@ -445,16 +448,26 @@ function initApp(){
   var app=document.getElementById('app');
   app.style.display='flex';app.style.flexDirection='column';
   loadSettings();loadState();
-  setupHeader();buildAndRender();startClock();initSpeech();
+  setupHeader();
+  safeSettings();
+  try{buildAndRender();}catch(e){
+    console.warn('buildAndRender failed, resetting:',e);
+    CUSTOM_BLOCKS=null;STATE={};safeSettings();
+    try{buildAndRender();}catch(e2){console.error('Fatal render error:',e2);}
+  }
+  startClock();initSpeech();
 }
 
 function loadSettings(){
   try{var s=localStorage.getItem(SETK);SETTINGS=s?JSON.parse(s):{};}catch(e){SETTINGS={};}
+  safeSettings();
+}
+function safeSettings(){
   if(!SETTINGS||typeof SETTINGS!=='object')SETTINGS={};
-  if(!Array.isArray(SETTINGS.routine))SETTINGS.routine=DEF_ROUTINE;
-  if(!Array.isArray(SETTINGS.rep))SETTINGS.rep=DEF_REP;
-  if(!Array.isArray(SETTINGS.admin))SETTINGS.admin=DEF_ADMIN;
-  if(!Array.isArray(SETTINGS.yoga))SETTINGS.yoga=DEF_YOGA;
+  if(!Array.isArray(SETTINGS.routine)||SETTINGS.routine.length===0)SETTINGS.routine=DEF_ROUTINE.slice();
+  if(!Array.isArray(SETTINGS.rep)||SETTINGS.rep.length===0)SETTINGS.rep=DEF_REP.slice();
+  if(!Array.isArray(SETTINGS.admin)||SETTINGS.admin.length===0)SETTINGS.admin=DEF_ADMIN.slice();
+  if(!Array.isArray(SETTINGS.yoga)||SETTINGS.yoga.length===0)SETTINGS.yoga=DEF_YOGA.slice();
 }
 function saveSettingsData(){localStorage.setItem(SETK,JSON.stringify(SETTINGS));}
 
@@ -512,11 +525,7 @@ function mkB(id,title,sub,dur,diary,pain,tmins,rest,yturl,btype){
 }
 
 function buildBlocks(){
-  // Defensive: ensure settings arrays exist before forEach
-  if(!Array.isArray(SETTINGS.routine))SETTINGS.routine=DEF_ROUTINE;
-  if(!Array.isArray(SETTINGS.rep))SETTINGS.rep=DEF_REP;
-  if(!Array.isArray(SETTINGS.admin))SETTINGS.admin=DEF_ADMIN;
-  if(!Array.isArray(SETTINGS.yoga))SETTINGS.yoga=DEF_YOGA;
+  safeSettings();
   if(CUSTOM_BLOCKS){
     BLOCKS=CUSTOM_BLOCKS.map(function(b){return Object.assign({},b);});
     computeTimes();return;
@@ -773,7 +782,18 @@ function resetT(tid,mins){
 // DRAG AND DROP (touch + mouse)
 // ═══════════════════════════════════════════════════════
 var DRAG_ID=null;var TOUCH_Y0=0;var TOUCH_ID=null;var TOUCH_MOVED=false;
-function dragStart(e,id){DRAG_ID=id;e.dataTransfer.effectAllowed='move';document.getElementById('item-'+id).classList.add('dragging');}
+function dragStart(e,id){
+  DRAG_ID=id;e.dataTransfer.effectAllowed='move';
+  var srcEl=document.getElementById('item-'+id);
+  srcEl.classList.add('dragging');
+  var ghost=document.createElement('div');
+  ghost.style.cssText='position:fixed;top:-200px;left:0;background:var(--bg2);border:1px solid var(--gold2);border-radius:10px;padding:6px 14px;font-size:12px;font-weight:500;color:var(--text);font-family:var(--body);white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;pointer-events:none;z-index:9999;';
+  var titleEl=srcEl.querySelector('.item-title');
+  ghost.textContent=titleEl?titleEl.textContent:'Block';
+  document.body.appendChild(ghost);
+  e.dataTransfer.setDragImage(ghost,12,20);
+  setTimeout(function(){if(ghost.parentNode)ghost.parentNode.removeChild(ghost);},0);
+}
 function dragOver(e,id){e.preventDefault();if(id===DRAG_ID)return;document.getElementById('item-'+id).classList.add('drag-over');}
 function dragDrop(e,id){
   e.preventDefault();
@@ -995,7 +1015,24 @@ function ask(msg){
   var thinking=addMsg('Thinking…','thinking');thinking.id='thinking-msg';
   callClaude(msg);
 }
-function showMsgs(){var m=document.getElementById('msgs');m.style.display='block';}
+var CHAT_MIN=false;
+function showMsgs(){
+  var m=document.getElementById('msgs');
+  m.style.display='block';
+  CHAT_MIN=false;
+  var btn=document.getElementById('min-btn');
+  if(btn)btn.textContent='−';
+}
+function toggleChatMin(){
+  var m=document.getElementById('msgs');
+  var btn=document.getElementById('min-btn');
+  if(!m)return;
+  if(m.style.display==='none'){
+    m.style.display='block';CHAT_MIN=false;if(btn)btn.textContent='−';
+  } else {
+    m.style.display='none';CHAT_MIN=true;if(btn)btn.textContent='+';
+  }
+}
 function addMsg(text,cls){
   var m=document.getElementById('msgs');
   var d=document.createElement('div');d.className='msg '+cls;d.textContent=text;
@@ -1074,7 +1111,7 @@ function buildSysPrompt(userMsg){
     +'\n- To build a custom day plan: return a JSON block like: ```json\n{"blocks":[{"id":"b1","title":"Title","sub":"detail","dur":20,"diary":"prompt","tmins":20,"btype":"custom","yturl":""}]}\n``` with full block array. Include all necessary blocks for the day.'
     +'\n- To start a nap: include NAP:60 (where 60 is minutes) in your response.'
     +'\n- To add a break: include BREAK:15 (where 15 is minutes) in your response.'
-    +'\n\nWhen the user describes their day in natural language (e.g. "I want to do yoga, then the morning after warm-up, then watch football at 12:30, gig at 7pm"), build a custom day plan JSON with appropriate blocks. For yoga routines use the ones from settings. For the Morning After warm-up use btype "warmup". For rest/family/watch/food blocks use appropriate btypes. Always include pain check-in, body scan, and diary blocks. Set realistic durations.'
+    +'\n\nWhen the user describes their day in natural language (e.g. "I want to do yoga, then the morning after warm-up, then watch football at 12:30, gig at 7pm"), build a custom day plan JSON with appropriate blocks. For yoga routines use the ones from settings. For the Morning After warm-up use btype "warmup". For rest/family/watch/food blocks use appropriate btypes. Always include pain check-in, body scan, and diary blocks. Set realistic durations.\n\nCRITICAL INTERLEAVING RULE: When asked to intersperse or alternate yoga and warm-up (Morning After) blocks, you MUST alternate strictly one-for-one — never place two yoga blocks or two warm-up blocks consecutively. Correct order regardless of how the user phrases it: yoga[0] → warmup[0] → yoga[1] → warmup[1] → yoga[2] → warmup[2]. Concrete example: Somatic yoga → Morning After Part 1 → 30-day yoga → Morning After Part 2 → Yoga for weight loss → Morning After Part 3. This strict alternation is non-negotiable.'
     +'\n\nCRITICAL - When building a custom day plan, your response must contain ONLY the JSON block and nothing else before it. Start your response with the plain text intro (1-2 sentences max), then output the JSON on its own line starting with {"blocks": - no code fences needed, just raw JSON. The app will parse it automatically.'
     +'\n\nJSON block format: {"blocks":[{"id":"b1","title":"Title","sub":"detail","dur":20,"diary":"prompt","tmins":20,"btype":"custom","yturl":"","rest":false,"pain":false}]}'
     +'\n\nFor non-plan responses: be warm, concise, 2-4 sentences max.';
